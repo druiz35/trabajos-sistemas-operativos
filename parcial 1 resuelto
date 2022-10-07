@@ -1,0 +1,52 @@
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int main(void) { 
+    int fd1[2];
+    int fd2[2];
+    pipe(fd1);/*Tubería 1*/
+    pipe(fd2);/*Tubería 2*/
+    pid_t pidC;
+    pidC = fork();
+
+    while (pidC > 0) { /*proceso padre*/
+        char cdna[50];
+        printf("Ingrese cadena de texto: ");
+        memset(cdna, 0, sizeof(cdna));/*Inicialización del buffer*/
+        fgets(cdna, 50, stdin); /*Captura por teclado*/
+        write(fd1[1], cdna, sizeof(cdna));/*escribe la cadena en fd1 para ser leida por el hijo*/
+        
+        /*Código para leer del hijo*/
+        char cdnaM[50] = {0};
+        memset(cdnaM, 0, sizeof(cdnaM));
+        read(fd2[0], cdnaM, sizeof(cdnaM));
+        /*salida de la cadena en mayúscula*/
+        printf("proceso padre recibe de regreso: %s", cdnaM);
+        
+    }
+
+    while (pidC == 0) { /*proceso hijo*/
+	int num;
+        char cdnam[50];
+        char cdnaM[50];
+        memset(cdnaM, 0, sizeof(cdnaM)); /*inicialización del buffer*/
+        read(fd1[0], cdnam, sizeof(cdnam)); /*lee la cadena minúscula escrita por el padre*/
+        printf("Proceso hijo recibe: %s", cdnam);
+        
+        /*converción de cadena a mayúscula*/
+        for (int indice = 0; cdnam[indice] != '\0'; ++indice){
+		cdnaM[indice] = toupper(cdnam[indice]);
+        }
+        /*Escribe la cadena convertida a mayúcula para ser leida por el padre
+        por medio de la tuberia 2*/
+        write(fd2[1], cdnaM, sizeof(cdnaM));
+    }
+    close(fd1[0]);
+    close(fd1[1]);
+    close(fd2[0]);
+    close(fd2[1]);
+    return 0;
+}
