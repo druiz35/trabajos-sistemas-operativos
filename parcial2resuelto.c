@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+# include<time.h>
 #define N 5
 
 int main(void) {
+    clock_t start, end;
+    double execution_time;
     int direccionesVirtuales[N];
     int paginas[N];
     int desplazamientos[N];
@@ -15,6 +18,7 @@ int main(void) {
         char input[20];
         printf("Ingrese direccion virtual: ");
         scanf("%s", input);
+        start = clock();
         if (strcmp(input, "s") == 0) {
             printf("Good bye!\n");
             free(dV);
@@ -55,14 +59,18 @@ int main(void) {
                     TLBSize = TLBSize + 1;
                 }
             }
+            end = clock();
+            execution_time = ((double)(end - start))/CLOCKS_PER_SEC;
             if (TLBState == 0) {
                 printf("Numero de pagina: %d\n", pagina);
                 printf("Desplazamiento: %d\n", desp);
+                printf("Tiempo de traducción: %f segundos\n", execution_time);
                 printf("TLB: Miss\n\n");
             }
             else if (TLBState == 1) {
                 printf("Numero de pagina: %d\n", pagina);
                 printf("Desplazamiento: %d\n", desp);
+                printf("Tiempo de traducción: %f segundos\n", execution_time);
                 printf("TLB: Hit\n\n");
             }
         }
